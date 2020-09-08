@@ -52,6 +52,9 @@ spec:
             else \
               exit 1; \
             fi
+        envFrom:
+          - secretRef:
+              name: sentry-secrets
         env:
         {{- if .Values.postgresql.enabled }}
         - name: POSTGRES_PASSWORD

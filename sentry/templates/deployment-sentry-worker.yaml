@@ -61,6 +61,9 @@ spec:
           - "-c"
           - "{{ .Values.sentry.worker.concurrency }}"
           {{- end }}
+        envFrom:
+        - secretRef:
+            name: sentry-secrets
         env:
         - name: SNUBA
           value: http://{{ template "sentry.fullname" . }}-snuba:{{ template "snuba.port" }}

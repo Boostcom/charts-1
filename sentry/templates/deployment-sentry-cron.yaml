@@ -56,6 +56,9 @@ spec:
         args:
           - "run"
           - "cron"
+        envFrom:
+        - secretRef:
+            name: sentry-secrets
         env:
         - name: SNUBA
           value: http://{{ template "sentry.fullname" . }}-snuba:{{ template "snuba.port" }}

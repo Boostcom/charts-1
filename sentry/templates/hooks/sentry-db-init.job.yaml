@@ -40,6 +40,9 @@ spec:
         image: "{{ template "sentry.image" . }}"
         imagePullPolicy: {{ default "IfNotPresent" .Values.images.sentry.pullPolicy }}
         command: ["sentry","upgrade","--noinput"]
+        envFrom:
+        - secretRef:
+            name: sentry-secrets
         env:
         {{- if .Values.postgresql.enabled }}
         - name: POSTGRES_PASSWORD

@@ -56,6 +56,9 @@ spec:
         command: ["sentry", "run", "web"]
         ports:
         - containerPort: {{ template "sentry.port" }}
+        envFrom:
+        - secretRef:
+            name: sentry-secrets
         env:
         - name: SNUBA
           value: http://{{ template "sentry.fullname" . }}-snuba:{{ template "snuba.port" }}
