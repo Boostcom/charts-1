@@ -110,8 +110,8 @@ sentry:
     # commitBatchSize: 1
   cleanup:
     enabled: true
-    schedule: "0 0 * * *"
-    days: 90
+    schedule: "5 4 * * *"
+    days: 14
 
 snuba:
   api:

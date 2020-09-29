@@ -53,6 +53,9 @@ spec:
               - "cleanup"
               - "--days"
               - "{{ .Values.sentry.cleanup.days }}"
+            envFrom:
+            - secretRef:
+                name: sentry-secrets
             env:
             - name: SNUBA
               value: http://{{ template "sentry.fullname" . }}-snuba:{{ template "snuba.port" }}
