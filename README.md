@@ -25,6 +25,8 @@ If you are using an ingress gateway (like istio), you have to change your inboun
 
 By default, NGINX is enabled to allow sending the incoming requests to [Sentry Relay](https://getsentry.github.io/relay/) or the Django backend depending on the path. When Sentry is meant to be exposed outside of the Kubernetes cluster, it is recommended to disable NGINX and let the Ingress do the same. It's recommended to go with the go to Ingress Controller, [NGINX Ingress](https://kubernetes.github.io/ingress-nginx/) but others should work as well.
 
+Note: if you are using NGINX Ingress, please set this annotation on your ingress : nginx.ingress.kubernetes.io/use-regex: "true"
+
 
 ## Upgrading from 3.1.0 version of this Chart to 4.0.0
 
@@ -85,103 +87,6 @@ To avoid issues when upgrade this chart, provide `postgresql.postgresqlPassword`
 This chart is capable of mounting the sentry-data PV in the Sentry worker and cron pods. This feature is disabled by default, but is needed for some advanced features such as private sourcemaps.
 
 You may enable mounting of the sentry-data PV across worker and cron pods by changing filestore.filesystem.persistence.persistentWorkers to true. If you plan on deploying Sentry containers across multiple nodes, you may need to change your PVC's access mode to ReadWriteMany and check that your PV supports mounting across multiple nodes.
-
-## Upgrade notes
-
-From v1 to v2, we changed the timezone of Clickhouse from Shanguai to UTC (Snuba requires it).
-You'll need to execute this query on your old events (if not you'll have "no events found on them") :
-
-```
-INSERT INTO sentry_local
-SELECT event_id,
-       project_id,
-       group_id,
-       timestamp + INTERVAL 8 HOUR         AS timestamp,
-       deleted,
-       retention_days,
-       platform,
-       message,
-       primary_hash,
-       received + INTERVAL 8 HOUR          AS received,
-       search_message,
-       title,
-       location,
-       user_id,
-       username,
-       email,
-       ip_address,
-       geo_country_code,
-       geo_region,
-       geo_city,
-       sdk_name,
-       sdk_version,
-       type,
-       version,
-       offset,
-       partition,
-       message_timestamp + INTERVAL 8 HOUR AS message_timestamp,
-       os_build,
-       os_kernel_version,
-       device_name,
-       device_brand,
-       device_locale,
-       device_uuid,
-       device_model_id,
-       device_arch,
-       device_battery_level,
-       device_orientation,
-       device_simulator,
-       device_online,
-       device_charging,
-       level,
-       logger,
-       server_name,
-       transaction,
-       environment,
-       `sentry:release`,
-       `sentry:dist`,
-       `sentry:user`,
-       site,
-       url,
-       app_device,
-       device,
-       device_family,
-       runtime,
-       runtime_name,
-       browser,
-       browser_name,
-       os,
-       os_name,
-       os_rooted,
-       `tags.key`,
-       `tags.value`,
-       _tags_flattened,
-       `contexts.key`,
-       `contexts.value`,
-       http_method,
-       http_referer,
-       `exception_stacks.type`,
-       `exception_stacks.value`,
-       `exception_stacks.mechanism_type`,
-       `exception_stacks.mechanism_handled`,
-       `exception_frames.abs_path`,
-       `exception_frames.filename`,
-       `exception_frames.package`,
-       `exception_frames.module`,
-       `exception_frames.function`,
-       `exception_frames.in_app`,
-       `exception_frames.colno`,
-       `exception_frames.lineno`,
-       `exception_frames.stack_level`,
-       culprit,
-       sdk_integrations,
-       `modules.name`,
-       `modules.version`
-FROM sentry_local
-WHERE timestamp < toDateTime('REPLACE_ME') + INTERVAL 8 HOUR;
-```
-
-Replace REPLACE_ME with the time Sentry was upgraded at in UTC (it should suffice to grab the timestamp from the first correctly received event after the upgrade and take a second off that) in the following format yyyy-mm-dd hh:mm:ss
 
 ## Roadmap
 
