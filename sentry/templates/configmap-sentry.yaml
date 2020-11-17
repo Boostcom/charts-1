@@ -19,11 +19,15 @@ data:
     {{- if .Values.system.url }}
     system.url-prefix: {{ .Values.system.url }}
     {{- end }}
+    postprocess.use-cache-key: 1.0
 
+    # This URL will be used to tell Symbolicator where to obtain the Sentry source.
+    # See https://getsentry.github.io/symbolicator/api/
+    system.internal-url-prefix: 'http://{{ template "sentry.fullname" . }}-web:{{ .Values.service.externalPort }}'
     symbolicator.enabled: {{ .Values.symbolicator.enabled }}
     {{- if .Values.symbolicator.enabled }}
     symbolicator.options:
-      url: "http://{{ template "sentry.fullname" . }}-symbolicator:3021"
+      url: "http://{{ template "sentry.fullname" . }}-symbolicator:{{ template "symbolicator.port" }}"
     {{- end }}
 
     {{- if .Values.github.appId }}
@@ -52,8 +56,10 @@ data:
     # slack.verification-token:
     {{- if .Values.slack.legacyApp }}
     slack.legacy-app: True
+    slack.verification-token: "{{ .Values.slack.verificationToken }}"
     {{- else }}
     slack.legacy-app: False
+    slack.signing-secret: "{{ .Values.slack.signingSecret }}"
     {{ end }}
     {{ end }}
 
@@ -109,7 +115,9 @@ data:
       {{- end }}
     {{ end }}
 
-{{ .Values.config.configYml | indent 4 }}
+    {{- if .Values.config.configYml }}
+{{ .Values.config.configYml | toYaml | indent 4 }}
+    {{- end }}
   sentry.conf.py: |-
     from sentry.conf.server import *  # NOQA
     from distutils.util import strtobool
@@ -290,28 +298,71 @@ data:
                 {{- if not .Values.sentry.singleOrganization }}
                 "organizations:create",
                 {{ end -}}
+
+                {{- if .Values.sentry.features.orgSubdomains }}
+                "organizations:org-subdomains",
+                {{ end -}}
+                "organizations:advanced-search",
+                "organizations:android-mappings",
+                "organizations:api-keys",
+                "organizations:boolean-search",
+                "organizations:related-events",
+                "organizations:alert-filters",
+                "organizations:custom-symbol-sources",
+                "organizations:data-forwarding",
                 "organizations:discover",
+                "organizations:discover-basic",
+                "organizations:discover-query",
+                "organizations:enterprise-perf",
+                "organizations:event-attachments",
                 "organizations:events",
                 "organizations:global-views",
+                "organizations:incidents",
+                "organizations:integrations-event-hooks",
                 "organizations:integrations-issue-basic",
                 "organizations:integrations-issue-sync",
+                "organizations:integrations-alert-rule",
+                "organizations:integrations-chat-unfurl",
+                "organizations:integrations-incident-management",
+                "organizations:integrations-vsts-limited-scopes",
+                "organizations:internal-catchall",
                 "organizations:invite-members",
-                "organizations:new-issue-ui",
+                "organizations:large-debug-files",
+                "organizations:monitors",
+                "organizations:onboarding",
+                "organizations:org-saved-searches",
                 "organizations:performance-view",
-                "organizations:repos",
-                "organizations:require-2fa",
                 "organizations:relay",
-                "organizations:sentry10",
+                "organizations:rule-page",
+                "organizations:set-grouping-config",
+                "organizations:slack-migration",
                 "organizations:sso-basic",
                 "organizations:sso-rippling",
                 "organizations:sso-saml2",
-                "organizations:suggested-commits",
+                "organizations:symbol-sources",
+                "organizations:transaction-comparison",
+                "organizations:trends",
+                "organizations:usage-stats-graph",
+                "organizations:dynamic-issue-counts",
+                "organizations:releases-v2",
+                "organizations:artifacts-in-settings",
+                "organizations:transaction-events",
+                "organizations:invite-members-rate-limits",
+
+                "projects:alert-filters",
                 "projects:custom-inbound-filters",
                 "projects:data-forwarding",
                 "projects:discard-groups",
-                "projects:plugins",
+                "projects:issue-alerts-targeting",
+                "projects:minidump",
                 "projects:rate-limits",
+                "projects:sample-events",
                 "projects:servicehooks",
+                "projects:similarity-view",
+                "projects:similarity-indexing",
+                "projects:similarity-view-v2",
+                "projects:similarity-indexing-v2",
+                "projects:reprocessing-v2",
             )
         }
     )
@@ -326,13 +377,6 @@ data:
     SENTRY_OPTIONS['mail.port'] = int(os.getenv("SENTRY_EMAIL_PORT", {{ .Values.mail.port }}))
     SENTRY_OPTIONS['mail.host'] = os.getenv("SENTRY_EMAIL_HOST", "{{ .Values.mail.host }}")
     SENTRY_OPTIONS['mail.from'] = os.getenv("SENTRY_EMAIL_FROM", "{{ .Values.mail.from }}")
-
-    ######################
-    # GitHub Integration #
-    #####################
-
-    GITHUB_APP_ID = '{{ .Values.githubSso.clientId }}'
-    GITHUB_API_SECRET = '{{ .Values.githubSso.clientSecret }}'
 
     #########################
     # Bitbucket Integration #
