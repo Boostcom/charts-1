@@ -56,10 +56,10 @@ data:
     # slack.verification-token:
     {{- if .Values.slack.legacyApp }}
     slack.legacy-app: True
-    slack.verification-token: "{{ .Values.slack.verificationToken }}"
+    # slack.verification-token: "{{ .Values.slack.verificationToken }}"
     {{- else }}
     slack.legacy-app: False
-    slack.signing-secret: "{{ .Values.slack.signingSecret }}"
+    # slack.signing-secret: "{{ .Values.slack.signingSecret }}"
     {{ end }}
     {{ end }}
 
