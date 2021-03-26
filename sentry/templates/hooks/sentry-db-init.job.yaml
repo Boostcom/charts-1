@@ -12,7 +12,7 @@ metadata:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
     "helm.sh/hook": "post-install,post-upgrade"
-    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    "helm.sh/hook-delete-policy": "{{ if .Values.hooks.removeOnSuccess }}hook-succeeded,{{ end }}before-hook-creation"
     "helm.sh/hook-weight": "6"
 spec:
   template:
@@ -60,8 +60,14 @@ spec:
           readOnly: true
         resources:
 {{ toYaml .Values.hooks.dbInit.resources | indent 10 }}
+{{- if .Values.hooks.dbInit.sidecars }}
+{{ toYaml .Values.hooks.dbInit.sidecars | indent 6 }}
+{{- end }}
       volumes:
       - name: config
         configMap:
           name: {{ template "sentry.fullname" . }}-sentry
+{{- if .Values.hooks.dbInit.volumes }}
+{{ toYaml .Values.hooks.dbInit.volumes | indent 6 }}
+{{- end }}
 {{- end -}}

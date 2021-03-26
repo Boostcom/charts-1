@@ -14,6 +14,24 @@ Big thanks to the maintainers of the [deprecated chart](https://github.com/helm/
 
 For now the full list of values is not documented but you can get inspired by the values.yaml specific to each directory.
 
+## Upgrading from 9.x.x version of this Chart to 10.0.0
+
+If you were using clickhouse ImagePullSecrets, [we unified](https://github.com/sentry-kubernetes/charts/commit/573ca29d03bf2c044004c1aa387f652a36ada23a) the way it's used.
+
+## Upgrading from 8.x.x version of this Chart to 9.0.0
+
+to simplify 1st time installations, backup value on clickhouse has been changed to false.
+
+clickhouse.clickhouse.configmap.remote_servers.replica.backup
+
+## Upgrading from 7.x.x version of this Chart to 8.0.0
+
+- the default value of features.orgSubdomains is now "false"
+
+## Upgrading from 6.x.x version of this Chart to 7.0.0
+
+- the default mode of relay is now "proxy". You can change it through the values.yaml file
+- we removed the `githubSso` variable for the oauth github configuration. It was using the old environment variable, that doesn't work with Sentry anymore. Just use the common github.xxxx configuration for both oauth & the application integration.
 
 ## Upgrading from 5.x.x version of this Chart to 6.0.0
 
@@ -33,7 +51,7 @@ By default, NGINX is enabled to allow sending the incoming requests to [Sentry R
 
 Note: if you are using NGINX Ingress, please set this annotation on your ingress : nginx.ingress.kubernetes.io/use-regex: "true"
 
-## Clichouse warning
+## Clickhouse warning
 
 Snuba only supports a UTC timezone for Clickhouse. Please keep the initial value!
 

@@ -4,18 +4,18 @@ dependencies:
   version: 9.3.2
 - name: kafka
   repository: https://charts.bitnami.com/bitnami
-  version: 9.0.4
+  version: 12.0.0
 - name: clickhouse
   repository: https://sentry-kubernetes.github.io/charts
-  version: 1.5.0
-- name: rabbitmq-ha
-  repository: https://kubernetes-charts.storage.googleapis.com/
-  version: 1.39.0
+  version: 2.0.0
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: 8.9.1
 - name: postgresql
-  repository: https://kubernetes-charts.storage.googleapis.com/
-  version: 8.2.1
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.2.4
 - name: nginx
   repository: https://charts.bitnami.com/bitnami
   version: 6.0.5
-digest: sha256:95a04a0fd6722f2f1b2d1750355060369a7d8e1cee6fd0e26974a4c402aff998
-generated: "2020-08-10T10:58:35.648936347+02:00"
+digest: sha256:1faa1c70f1ed09d8841a6660d510500c609973eddeec213a182fc04eb57767aa
+generated: "2021-03-16T08:40:43.272639+01:00"
