@@ -223,8 +223,11 @@ snuba:
 hooks:
   enabled: true
   removeOnSuccess: true
+  clickhouseInit:
+    podAnnotations:
   dbCheck:
     env: []
+    podAnnotations: []
     resources:
       limits:
         memory: 64Mi
@@ -233,6 +236,7 @@ hooks:
         memory: 64Mi
   dbInit:
     env: []
+    podAnnotations: []
     resources:
       limits:
         memory: 2048Mi
@@ -242,6 +246,7 @@ hooks:
     sidecars: [ ]
     volumes: [ ]
   snubaInit:
+    podAnnotations: []
     resources:
       limits:
         cpu: 2000m
@@ -280,9 +285,30 @@ symbolicator:
     # tolerations: []
     # podLabels: []
     # priorityClassName: "xxx"
-    logging:
-      level: warn
+    config: |-
+      # See: https://getsentry.github.io/symbolicator/#configuration
+      cache_dir: "/data"
+      bind: "0.0.0.0:3021"
+      logging:
+        level: "warn"
+      metrics:
+        statsd: null
+        prefix: "symbolicator"
+      sentry_dsn: null
+      connect_to_reserved_ips: true
+      # caches:
+      #   downloaded:
+      #     max_unused_for: 1w
+      #     retry_misses_after: 5m
+      #     retry_malformed_after: 5m
+      #   derived:
+      #     max_unused_for: 1w
+      #     retry_misses_after: 5m
+      #     retry_malformed_after: 5m
+      #   diagnostics:
+      #     retention: 1w
 
+    # TODO autoscaling in not yet implemented
     autoscaling:
       enabled: false
       minReplicas: 2
@@ -341,6 +367,7 @@ nginx:
 ingress:
   enabled: false
   # If you are using traefik ingress controller, switch this to 'traefik'
+  # if you are using AWS ALB Ingress controller, switch this to 'aws-alb'
   regexPathStyle: nginx
   # annotations:
   #   If you are using nginx ingress controller, please use at least those 2 annotations
@@ -423,6 +450,18 @@ clickhouse:
         replica:
           backup:
             enabled: false
+      users:
+        enabled: false
+        user:
+        # the first user will be used if enabled
+        - name: default
+          config:
+            password: ""
+            networks:
+            - ::/0
+            profile: default
+            quota: default
+          
     persistentVolumeClaim:
       enabled: true
       dataPersistentVolume:
@@ -438,6 +477,9 @@ externalClickhouse:
   ##
   host: "clickhouse"
   tcpPort: 9000
+  username: default
+  password: ""
+  database: default
   ## Cluster name, can be found in config
   ## (https://clickhouse.tech/docs/en/operations/server-configuration-parameters/settings/#server-settings-remote-servers)
   ## or by executing `select * from system.clusters`
@@ -637,3 +679,5 @@ metrics:
     #   any: true
     scrapeInterval: 30s
     # honorLabels: true
+
+revisionHistoryLimit: 10

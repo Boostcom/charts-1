@@ -17,6 +17,7 @@ metadata:
     "helm.sh/hook-weight": "17"
   {{- end }}
 spec:
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
         app: {{ template "sentry.fullname" . }}
@@ -68,6 +69,9 @@ spec:
 {{- if .Values.snuba.outcomesConsumer.env }}
 {{ toYaml .Values.snuba.outcomesConsumer.env | indent 8 }}
 {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ template "sentry.fullname" . }}-snuba-env
         volumeMounts:
         - mountPath: /etc/snuba
           name: config
