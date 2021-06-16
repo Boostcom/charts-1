@@ -6,7 +6,7 @@
 {{- $clickhouseClusterName := include "sentry.clickhouse.cluster.name" . -}}
 {{- $tables := "discover errors groupassignee groupedmessage outcomes_hourly migrations outcomes_mv_hourly outcomes_raw sentry sessions_hourly sessions_hourly_mv sessions_raw transactions" -}}
 {{- $dropQuery := "DROP TABLE IF EXISTS ${tbl}_dist" -}}
-{{- $createQuery := $clickhouseClusterName | printf "CREATE TABLE ${tbl}_dist AS ${tbl}_local ENGINE = Distributed('%s', default, ${tbl}_local, rand())" -}}
+{{- $createQuery := printf "CREATE TABLE ${tbl}_dist AS ${tbl}_local ENGINE = Distributed('%s', '%s', ${tbl}_local, rand())" $clickhouseClusterName $clickhouseDB -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -26,10 +26,26 @@ spec:
   template:
     metadata:
       name: {{ template "sentry.fullname" . }}-clickhouse-init
+      annotations:
+        {{- if .Values.hooks.clickhouseInit.podAnnotations }}
+{{ toYaml .Values.hooks.clickhouseInit.podAnnotations | indent 8 }}
+        {{- end }}
       labels:
         app: sentry
         release: "{{ .Release.Name }}"
     spec:
+      {{- if .Values.hooks.clickhouseInit.affinity }}
+      affinity:
+{{ toYaml .Values.hooks.clickhouseInit.affinity | indent 8 }}
+      {{- end }}
+      {{- if .Values.hooks.clickhouseInit.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.hooks.clickhouseInit.nodeSelector | indent 8 }}
+      {{- end }}
+      {{- if .Values.hooks.clickhouseInit.tolerations }}
+      tolerations:
+{{ toYaml .Values.hooks.clickhouseInit.tolerations | indent 8 }}
+      {{- end }}
       restartPolicy: Never
       {{- if .Values.clickhouse.clickhouse.imagePullSecrets }}
       imagePullSecrets:
